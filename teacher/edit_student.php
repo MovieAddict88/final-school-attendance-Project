@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once '../includes/session.php';
+require_once '../includes/csrf.php';
 if (!isset($_SESSION['teacher_id'])) {
     header("Location: index.php");
     exit();
@@ -13,6 +14,7 @@ $student = null;
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    verify_csrf_or_die();
     $student_id = $_POST['student_id'];
     $last_name = trim($_POST['last_name']);
     $first_name = trim($_POST['first_name']);
@@ -101,6 +103,7 @@ $subject_id_return = isset($_GET['subject_id']) ? $_GET['subject_id'] : '';
 
                     <?php if ($student): ?>
                     <form action="edit_student.php?student_id=<?php echo $student['id']; ?>&section_id=<?php echo $section_id_return; ?>&subject_id=<?php echo $subject_id_return; ?>" method="post">
+                        <?php echo csrf_field(); ?>
                         <input type="hidden" name="student_id" value="<?php echo $student['id']; ?>">
                         <div class="input-group">
                             <label for="last_name">Last Name</label>

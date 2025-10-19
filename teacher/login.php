@@ -1,8 +1,10 @@
 <?php
-session_start();
+require_once '../includes/session.php';
+require_once '../includes/csrf.php';
 include '../includes/database.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    verify_csrf_or_die();
     $email = $_POST['email'];
     $password = $_POST['password'];
 
@@ -15,6 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         if (password_verify($password, $row['password'])) {
+            session_regenerate();
             $_SESSION['teacher_id'] = $row['id'];
             $_SESSION['teacher_name'] = $row['full_name'];
             $_SESSION['teacher_profile_image'] = $row['profile_image'];

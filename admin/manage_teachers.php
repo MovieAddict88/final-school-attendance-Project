@@ -83,7 +83,11 @@ while ($row = $result->fetch_assoc()) {
                                     </td>
                                     <td>
                                         <a href="edit_teacher.php?id=<?php echo $teacher['id']; ?>" class="btn-edit">Edit</a>
-                                        <a href="delete_teacher.php?id=<?php echo $teacher['id']; ?>" class="btn-delete" onclick="return confirm('Are you sure you want to delete this teacher?');">Delete</a>
+                                        <form action="delete_teacher.php" method="post" style="display:inline" onsubmit="return confirm('Are you sure you want to delete this teacher?');">
+                                            <?php echo csrf_field(); ?>
+                                            <input type="hidden" name="id" value="<?php echo $teacher['id']; ?>">
+                                            <button type="submit" class="btn-delete">Delete</button>
+                                        </form>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

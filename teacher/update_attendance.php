@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once '../includes/session.php';
+require_once '../includes/csrf.php';
 if (!isset($_SESSION['teacher_id'])) {
     http_response_code(403);
     echo json_encode(['error' => 'User not authenticated']);
@@ -9,6 +10,9 @@ if (!isset($_SESSION['teacher_id'])) {
 include '../includes/database.php';
 
 header('Content-Type: application/json');
+
+// Verify CSRF token via header
+verify_csrf_or_die();
 
 $data = json_decode(file_get_contents('php://input'), true);
 

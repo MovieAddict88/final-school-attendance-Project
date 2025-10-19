@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once '../includes/session.php';
+require_once '../includes/csrf.php';
 if (!isset($_SESSION['teacher_id'])) {
     header("Location: index.php");
     exit();
@@ -433,6 +434,7 @@ if (!empty($month_dates)) {
     </div>
     <script>
     document.addEventListener('DOMContentLoaded', function () {
+        const csrfToken = <?php echo json_encode(csrf_token()); ?>;
         const subjectId = <?php echo json_encode($subject_id); ?>;
         const container = document.getElementById('attendance-table-container');
         const prevWeekBtn = document.getElementById('scroll-prev-week');
@@ -462,7 +464,7 @@ if (!empty($month_dates)) {
 
                 fetch('update_attendance.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
                     body: JSON.stringify({
                         student_id: studentId,
                         subject_id: subjectId,

@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once '../includes/session.php';
+require_once '../includes/csrf.php';
 if (!isset($_SESSION['admin_id'])) {
     header("Location: index.php");
     exit();
@@ -12,6 +13,7 @@ $sql_students = "SELECT id, last_name, first_name, middle_name FROM students ORD
 $result_students = $conn->query($sql_students);
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    verify_csrf_or_die();
     $full_name = $_POST['full_name'];
     $email = $_POST['email'];
     $phone = $_POST['phone'];
@@ -50,6 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <p class="error"><?php echo $error; ?></p>
                 <?php endif; ?>
                 <form action="add_parent.php" method="post">
+                    <?php echo csrf_field(); ?>
                     <div class="input-group">
                         <label for="full_name">Full Name</label>
                         <input type="text" id="full_name" name="full_name" required>

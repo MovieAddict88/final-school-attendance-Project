@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once '../includes/session.php';
+require_once '../includes/csrf.php';
 if (!isset($_SESSION['teacher_id'])) {
     header("Location: index.php");
     exit();
@@ -11,6 +12,7 @@ $message = '';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    verify_csrf_or_die();
     $last_name = trim($_POST['last_name']);
     $first_name = trim($_POST['first_name']);
     $middle_name = trim($_POST['middle_name']);
@@ -82,6 +84,7 @@ $subject_id_return = isset($_GET['subject_id']) ? $_GET['subject_id'] : '';
                     <?php endif; ?>
 
                     <form action="add_student.php?section_id=<?php echo $section_id_return; ?>&subject_id=<?php echo $subject_id_return; ?>" method="post">
+                        <?php echo csrf_field(); ?>
                         <div class="input-group">
                             <label for="last_name">Last Name</label>
                             <input type="text" id="last_name" name="last_name" required>
