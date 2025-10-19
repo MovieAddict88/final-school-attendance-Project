@@ -56,7 +56,11 @@ $result = $conn->query($sql);
                                     <td><?php echo htmlspecialchars($row['grade_name'] . ' - ' . $row['section_name']); ?></td>
                                     <td>
                                         <a href="edit_student.php?id=<?php echo $row['id']; ?>" class="btn-edit">Edit</a>
-                                        <a href="delete_student.php?id=<?php echo $row['id']; ?>" class="btn-delete" onclick="return confirm('Are you sure you want to delete this student?');">Delete</a>
+                                        <form action="delete_student.php" method="post" style="display:inline" onsubmit="return confirm('Are you sure you want to delete this student?');">
+                                            <?php echo csrf_field(); ?>
+                                            <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
+                                            <button type="submit" class="btn-delete">Delete</button>
+                                        </form>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>

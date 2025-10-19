@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once '../includes/session.php';
+require_once '../includes/csrf.php';
 if (isset($_SESSION['teacher_id'])) {
     header("Location: dashboard.php");
     exit();
@@ -17,6 +18,7 @@ if (isset($_SESSION['teacher_id'])) {
     <div class="login-container">
         <h2>Teacher Login</h2>
         <form action="login.php" method="post">
+            <?php echo csrf_field(); ?>
             <div class="input-group">
                 <label for="email">Email</label>
                 <input type="email" name="email" id="email" required>

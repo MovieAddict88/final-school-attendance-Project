@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once '../includes/session.php';
+require_once '../includes/csrf.php';
 if (!isset($_SESSION['admin_id'])) {
     header("Location: index.php");
     exit();
@@ -8,22 +9,39 @@ if (!isset($_SESSION['admin_id'])) {
 include '../includes/database.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    verify_csrf_or_die();
     $full_name = $_POST['full_name'];
     $email = $_POST['email'];
     $phone = $_POST['phone'];
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
     $profile_image = '';
-    if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] == 0) {
+    if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
         $target_dir = "../uploads/images/";
         if (!is_dir($target_dir)) {
             mkdir($target_dir, 0755, true);
         }
-        $filename = basename($_FILES["profile_image"]["name"]);
-        $target_file = $target_dir . $filename;
-        if (move_uploaded_file($_FILES["profile_image"]["tmp_name"], $target_file)) {
-            $profile_image = "uploads/images/" . $filename;
+        $maxBytes = 2 * 1024 * 1024; // 2MB
+        if ($_FILES['profile_image']['size'] > $maxBytes) {
+            throw new Exception('Profile image exceeds 2MB size limit.');
         }
+        $allowedExts = ['jpg','jpeg','png','gif','webp'];
+        $ext = strtolower(pathinfo($_FILES['profile_image']['name'], PATHINFO_EXTENSION));
+        if (!in_array($ext, $allowedExts, true)) {
+            throw new Exception('Unsupported image type.');
+        }
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo->file($_FILES['profile_image']['tmp_name']);
+        $allowedMime = ['image/jpeg','image/png','image/gif','image/webp'];
+        if (!in_array($mime, $allowedMime, true)) {
+            throw new Exception('Invalid image content.');
+        }
+        $randomName = bin2hex(random_bytes(16)) . '.' . $ext;
+        $target_file = $target_dir . $randomName;
+        if (!move_uploaded_file($_FILES['profile_image']['tmp_name'], $target_file)) {
+            throw new Exception('Failed to move uploaded file.');
+        }
+        $profile_image = "uploads/images/" . $randomName;
     }
 
     $conn->begin_transaction();
@@ -84,6 +102,7 @@ $result_subjects = $conn->query($sql_subjects);
                     <p class="error"><?php echo $error; ?></p>
                 <?php endif; ?>
                 <form action="add_teacher.php" method="post" enctype="multipart/form-data">
+                    <?php echo csrf_field(); ?>
                     <div class="input-group">
                         <label for="full_name">Full Name</label>
                         <input type="text" id="full_name" name="full_name" required>

@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once '../includes/session.php';
+require_once '../includes/csrf.php';
 if (!isset($_SESSION['admin_id'])) {
     header("Location: index.php");
     exit();
@@ -7,8 +8,13 @@ if (!isset($_SESSION['admin_id'])) {
 
 include '../includes/database.php';
 
-if (isset($_GET['id'])) {
-    $parent_id = $_GET['id'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verify_csrf_or_die();
+    $parent_id = $_POST['id'] ?? null;
+    if (!$parent_id) {
+        header("Location: manage_parents.php");
+        exit();
+    }
     $sql = "DELETE FROM parents WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $parent_id);
@@ -20,7 +26,7 @@ if (isset($_GET['id'])) {
         echo "Error deleting record: " . $conn->error;
     }
 } else {
-    header("Location: manage_parents.php");
-    exit();
+    http_response_code(405);
+    echo "Method Not Allowed";
 }
 ?>

@@ -1,9 +1,11 @@
 <?php
-session_start();
+require_once '../includes/session.php';
+require_once '../includes/csrf.php';
 include '../includes/database.php';
 
 // Check if it's a POST request
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    verify_csrf_or_die();
     $username = $_POST['username'];
     $password = $_POST['password'];
 
@@ -21,6 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($conn->query($sql_insert_admin) === TRUE) {
             // Log in the new admin automatically
             $last_id = $conn->insert_id;
+            session_regenerate();
             $_SESSION['admin_id'] = $last_id;
             $_SESSION['admin_username'] = $default_username;
             header("Location: dashboard.php");
@@ -40,6 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         if (password_verify($password, $row['password'])) {
+            session_regenerate();
             $_SESSION['admin_id'] = $row['id'];
             $_SESSION['admin_username'] = $row['username'];
             header("Location: dashboard.php");

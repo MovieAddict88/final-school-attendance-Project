@@ -52,7 +52,11 @@ $result = $conn->query($sql);
                                     <td><?php echo $row['student_name']; ?></td>
                                     <td>
                                         <a href="edit_parent.php?id=<?php echo $row['id']; ?>" class="btn-edit">Edit</a>
-                                        <a href="delete_parent.php?id=<?php echo $row['id']; ?>" class="btn-delete" onclick="return confirm('Are you sure you want to delete this parent?');">Delete</a>
+                                        <form action="delete_parent.php" method="post" style="display:inline" onsubmit="return confirm('Are you sure you want to delete this parent?');">
+                                            <?php echo csrf_field(); ?>
+                                            <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
+                                            <button type="submit" class="btn-delete">Delete</button>
+                                        </form>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>

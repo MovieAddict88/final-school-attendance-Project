@@ -1,50 +1,59 @@
 <?php
-$servername = "sql312.infinityfree.com";
-$username = "if0_40086614";
-$password = "3z61mIXR0Ws";
-$dbname = "if0_40086614_test";
+// Database configuration with environment variable support
+$servername = getenv('DB_HOST') ?: "sql312.infinityfree.com";
+$username = getenv('DB_USER') ?: "if0_40086614";
+$password = getenv('DB_PASS') ?: "3z61mIXR0Ws";
+$dbname = getenv('DB_NAME') ?: "if0_40086614_test";
 
-// Create connection
-$conn = new mysqli($servername, $username, $password);
+// Create connection (attempt with database selected)
+$conn = new mysqli($servername, $username, $password, $dbname);
 
 // Check connection
 if ($conn->connect_error) {
-    // Try to create the database and user if they don't exist
-    // This requires a root-level connection temporarily.
-    $root_conn = new mysqli($servername, 'root', '');
-    if ($root_conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error . " and could not connect as root to fix: " . $root_conn->connect_error);
-    }
+    // Optionally bootstrap local development database if explicitly enabled
+    $shouldBootstrap = (getenv('DB_BOOTSTRAP') === '1') && in_array($servername, ['localhost', '127.0.0.1'], true);
+    if ($shouldBootstrap) {
+        // Try to create the database and user if they don't exist (local dev only)
+        $root_conn = new mysqli($servername, 'root', '');
+        if ($root_conn->connect_error) {
+            die("Connection failed: " . $conn->connect_error . " and could not connect as root to fix: " . $root_conn->connect_error);
+        }
 
-    // Create database
-    $sql_create_db = "CREATE DATABASE IF NOT EXISTS $dbname";
-    if (!$root_conn->query($sql_create_db)) {
-        die("Error creating database: " . $root_conn->error);
-    }
+        // Create database
+        $sql_create_db = "CREATE DATABASE IF NOT EXISTS `$dbname`";
+        if (!$root_conn->query($sql_create_db)) {
+            die("Error creating database: " . $root_conn->error);
+        }
 
-    // Create user
-    $sql_create_user = "CREATE USER IF NOT EXISTS '$username'@'localhost' IDENTIFIED BY '$password'";
-    if (!$root_conn->query($sql_create_user)) {
-        die("Error creating user: " . $root_conn->error);
-    }
+        // Create user
+        $sql_create_user = "CREATE USER IF NOT EXISTS '$username'@'localhost' IDENTIFIED BY '$password'";
+        if (!$root_conn->query($sql_create_user)) {
+            die("Error creating user: " . $root_conn->error);
+        }
 
-    // Grant privileges
-    $sql_grant_privileges = "GRANT ALL PRIVILEGES ON $dbname.* TO '$username'@'localhost'";
-    if (!$root_conn->query($sql_grant_privileges)) {
-        die("Error granting privileges: " . $root_conn->error);
-    }
+        // Grant privileges
+        $sql_grant_privileges = "GRANT ALL PRIVILEGES ON `$dbname`.* TO '$username'@'localhost'";
+        if (!$root_conn->query($sql_grant_privileges)) {
+            die("Error granting privileges: " . $root_conn->error);
+        }
 
-    $root_conn->close();
+        $root_conn->close();
 
-    // Retry initial connection
-    $conn = new mysqli($servername, $username, $password, $dbname);
-    if ($conn->connect_error) {
-        die("Connection failed even after setup attempt: " . $conn->connect_error);
+        // Retry initial connection
+        $conn = new mysqli($servername, $username, $password, $dbname);
+        if ($conn->connect_error) {
+            die("Connection failed even after setup attempt: " . $conn->connect_error);
+        }
+    } else {
+        die("Connection failed: " . $conn->connect_error);
     }
 }
 
 // Select the database
 $conn->select_db($dbname);
+
+// Ensure modern charset
+$conn->set_charset('utf8mb4');
 
 // SQL to create tables
 $sql_admins = "CREATE TABLE IF NOT EXISTS admins (
