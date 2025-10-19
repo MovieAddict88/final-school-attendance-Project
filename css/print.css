@@ -1,0 +1,86 @@
+/*
+ * Print-specific stylesheet for the SF2 Attendance Sheet.
+ */
+
+/* General page setup for printing */
+body {
+    font-size: 10pt;
+    -webkit-print-color-adjust: exact !important; /* Chrome, Safari */
+    color-adjust: exact !important; /* Firefox */
+}
+
+/* Ensure the main container takes up the full width */
+.dashboard-container {
+    display: block;
+    width: 100%;
+}
+
+.main-content, .content-area {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+/* Remove box-shadow and border from the sheet for a cleaner print look */
+.sf2-sheet {
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Hide non-essential elements from the print view */
+.dashboard-container > .header,
+.attendance-controls,
+.add-students-form,
+.btn-edit,
+.action-col {
+    display: none !important;
+}
+
+/* Table and layout adjustments for print */
+.table-container-scrollable {
+    overflow-x: visible !important; /* Show all columns */
+    max-width: none !important;
+    border: none !important;
+}
+
+.attendance-table-monthly {
+    width: 100%;
+    table-layout: auto;
+    border-collapse: collapse; /* Ensure borders are clean */
+}
+
+/* Remove sticky positioning for all columns */
+.sticky-col, .total-col {
+    position: static !important;
+    left: auto !important;
+    right: auto !important;
+    background-color: #fff !important; /* Ensure background is consistent */
+}
+
+/* Reduce padding and font size for better fit on paper */
+.attendance-table-monthly th,
+.attendance-table-monthly td {
+    padding: 4px;
+    font-size: 9pt;
+    border: 1px solid #ccc; /* Use a lighter border for print */
+}
+
+.name-col {
+    min-width: 150px;
+}
+
+/* --- Color and Icon Styling --- */
+/* Ensure colors for Present/Absent are printed */
+.attendance-cell.present {
+    color: green !important;
+}
+
+.attendance-cell.absent {
+    color: red !important;
+}
+
+/* Page orientation and margins */
+@page {
+    size: landscape;
+    margin: 0.5in;
+}
